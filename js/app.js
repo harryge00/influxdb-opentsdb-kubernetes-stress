@@ -37,7 +37,7 @@ var refreshIntervalId = setInterval(function() {
       'Content-Length': Buffer.byteLength(postData)
     }
   };
-  var req = http.request(options, function(res) {
+  var req = http.request(options, (res) => {
     if(res.statusCode != 204) {
       console.log(`${res.statusCode} ${JSON.stringify(res.headers)}`);
       fail++;
