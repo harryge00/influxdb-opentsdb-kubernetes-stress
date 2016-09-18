@@ -35,7 +35,6 @@ var (
 func getBody() string{
   // "cpu_load_short,host=server01,region=us-east value=0.89 1434055562000000000"
   str := "cpu_load_short,host=" + hosts[rand.Intn(hostNum)] +",region=" + region[rand.Intn(regionNum)] + " value=" + strconv.Itoa(rand.Int()) + " " + strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
-  log.Println(str)
   return str
 }
 
@@ -64,13 +63,11 @@ func write() {
   resp, err := client.Do(req)
   if err != nil {
       log.Println(err)
+      return
   }
-  defer resp.Body.Close()
   if resp.StatusCode != 204 {
     log.Println("response Status:", resp.Status)
     log.Println("response Headers:", resp.Header)
-    body, _ := ioutil.ReadAll(resp.Body)
-    log.Println("response Body:", string(body))
   }
 }
 
