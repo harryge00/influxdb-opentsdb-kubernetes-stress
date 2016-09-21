@@ -13,20 +13,13 @@ var regions = ["us-east-1",
 "sa-east-1"];
 //curl -i -XPOST 'http://localhost:8086/write?db=mydb' --data-binary 'cpu_load_short,host=server01,region=us-west value=0.64 1434055562000000000'
 var date = Date.now();
-function genPostData(n) {
-  var host;
-  var region;
-  var res = "";
-  for(var i = 0; i < n; i++) {
-    host = hosts[Math.floor(Math.random() * hosts.length)];
-    region = regions[Math.floor(Math.random() * regions.length)];
-    res += "cpu_load_short,host=" + host + ",region=" + region +" value=" + Math.random() + " " + date + "\n";
-    date++;
-  }
-  return res;
+function getQuery() {
+  var query = 'select value from cpu_load_short where ';
+  query += "\"host\"='" + hosts[Math.floor(Math.random() * hosts.length)] + "' and \"region\"='" + regions[Math.floor(Math.random() * regions.length)] + "'";
+  // console.log(query);
+  return query;
 }
 
-var rate = process.env.RATE;
 var workers = process.env.WORKERS;
 var total = workers * process.env.RUNTIME;
 var count = 0;
@@ -37,39 +30,34 @@ var refreshIntervalId = setInterval(function() {
     return;
   }
   for(var i = 0; i < workers; i++) {
-    var postData = genPostData(rate);
-    // console.log(postData);
     var options = {
       hostname: process.env.HOSTNAME || "localhost",
       port: process.env.PORT || "8086",
-      path: '/write?db=' + process.env.DB || "mydb",
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(postData)
-      }
+      path: '/query?db=' + (process.env.DB || "mydb") + "&epoch=s&q=" + encodeURIComponent(getQuery())
     };
     count++;
     var req = http.request(options, (res) => {
-      if(res.statusCode != 204) {
+      if(res.statusCode != 200) {
+        res.on('data', (chunk) => {
+          console.log(`BODY: ${chunk}`);
+        });
         console.log(`${res.statusCode} ${JSON.stringify(res.headers)}`);
         fail++;
       } else {
         success++;
       }
       if(success + fail == count) {
-        console.log("success:", success * rate, "fail:", fail * rate);
+        console.log("success:", success, "fail:", fail);
       }
     });
     req.on('error', (e) => {
       console.log(`problem with request: ${e.message}`);
     });
-    req.write(postData);
     req.end();
   }
 }, 1000);
 
 setTimeout(function() {
   clearInterval(refreshIntervalId);
-  console.log("total:", count * rate);
+  console.log("total:", count);
 }, 1000 * process.env.RUNTIME + 3000);
