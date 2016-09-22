@@ -69,7 +69,26 @@ var refreshIntervalId = setInterval(function() {
   }
 }, 1000);
 
+function getTotalWrites() {
+  var options = {
+    hostname: process.env.HOSTNAME || "localhost",
+    port: process.env.PORT || "8086",
+    path: '/query?db=' + (process.env.DB || "mydb") + "&epoch=s&q=" + encodeURIComponent("select count(value) from cpu_load_short")
+  };
+  var req = http.request(options, (res) => {
+    res.on('data', (chunk) => {
+      console.log(`Final Result: ${chunk}`);
+    });
+    console.log(`${res.statusCode} ${JSON.stringify(res.headers)}`);
+  });
+  req.on('error', (e) => {
+    console.log(`problem with request: ${e.message}`);
+  });
+  req.end();
+}
+
 setTimeout(function() {
   clearInterval(refreshIntervalId);
   console.log("total:", count * rate);
+  getTotalWrites();
 }, 1000 * process.env.RUNTIME + 3000);

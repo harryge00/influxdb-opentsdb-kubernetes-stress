@@ -11,8 +11,10 @@ spec:
       env:
       - name: RATE
         value: "100"
+      - name: WORKERS
+        value: "1"
       - name: RUNTIME
-        value: "10"
+        value: "60"
       - name: DB
         value: mydb
       - name: HOSTNAME
