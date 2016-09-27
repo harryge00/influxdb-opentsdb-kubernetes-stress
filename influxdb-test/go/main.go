@@ -65,7 +65,7 @@ func write() {
       log.Println(err)
       return
   }
-  if resp.StatusCode != 204 {
+  if resp.StatusCode != 200 {
     log.Println("response Status:", resp.Status)
     log.Println("response Headers:", resp.Header)
   }
