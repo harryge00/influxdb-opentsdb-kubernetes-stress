@@ -2,6 +2,12 @@
 
 Simple test, writing lots of data to db.
 
+## Data structure
+
+`host=server01,region=us-west value=0.64 1434055562000000000`
+* Value is random floating number between 0 and 1.
+* Host and region is one element of the predefined array.
+
 ## Run stress-test in go
 
 * RUNTIME: how long the test lasts
